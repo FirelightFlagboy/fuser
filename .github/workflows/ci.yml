@@ -66,14 +66,24 @@ jobs:
 
   test-mac:
     runs-on: macos-latest
+    strategy:
+      matrix:
+        flavor: [ macfuse, fuse-t ]
     steps:
       - uses: actions/checkout@v4
 
       - name: Install macfuse
+        if: matrix.flavor == 'macfuse'
         run: brew install --cask macfuse
+
+      - name: Install fuse-t
+        if: matrix.flavor == 'fuse-t'
+        run: |
+          brew tap macos-fuse-t/homebrew-cask
+          brew install --cask fuse-t
 
       - uses: actions-rust-lang/setup-rust-toolchain@v1
 
       - name: Run tests
-        run: cargo test
+        run: cargo test --features=${{ matrix.flavor == 'fuse-t' && 'macos-use-fuse-t' || '' }}
         timeout-minutes: 5 # The test `mnt::test::mount_unmount` don't seems to finish on macos
