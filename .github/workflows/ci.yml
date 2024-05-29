@@ -85,5 +85,5 @@ jobs:
       - uses: actions-rust-lang/setup-rust-toolchain@v1
 
       - name: Run tests
-        run: cargo test
+        run: cargo test --features=${{ matrix.flavor == 'fuse-t' && 'macos-use-fuse-t' || '' }}
         timeout-minutes: 5 # The test `mnt::test::mount_unmount` don't seems to finish on macos

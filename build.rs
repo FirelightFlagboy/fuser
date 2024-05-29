@@ -6,19 +6,34 @@ fn main() {
     {
         #[cfg(target_os = "macos")]
         {
-            if pkg_config::Config::new()
-                .atleast_version("2.6.0")
-                .probe("fuse") // for macFUSE 4.x
-                .map_err(|e| eprintln!("{}", e))
-                .is_ok()
+            #[cfg(not(feature = "macos-use-fuse-t"))]
             {
-                println!("cargo:rustc-cfg=feature=\"libfuse2\"");
-            } else {
-                pkg_config::Config::new()
+                if pkg_config::Config::new()
                     .atleast_version("2.6.0")
-                    .probe("osxfuse") // for osxfuse 3.x
+                    .probe("fuse") // for macFUSE 4.x
                     .map_err(|e| eprintln!("{}", e))
+                    .is_ok()
+                {
+                    println!("Using macFUSE 4.x for macos");
+                    println!("cargo:rustc-cfg=feature=\"libfuse2\"");
+                } else {
+                    pkg_config::Config::new()
+                        .atleast_version("2.6.0")
+                        .probe("osxfuse") // for osxfuse 3.x
+                        .map_err(|e| eprintln!("{}", e))
+                        .unwrap();
+                    println!("Using osxfuse 3.x for macos");
+                    println!("cargo:rustc-cfg=feature=\"libfuse2\"");
+                }
+            }
+            #[cfg(feature = "macos-use-fuse-t")]
+            {
+                pkg_config::Config::new()
+                    .atleast_version("1.0.38")
+                    .probe("fuse-t")
+                    .map_err(|e| eprintln!("{e}"))
                     .unwrap();
+                println!("Using fuse-t 1.x for macos");
                 println!("cargo:rustc-cfg=feature=\"libfuse2\"");
             }
         }

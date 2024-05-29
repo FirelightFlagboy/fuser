@@ -37,6 +37,8 @@ pkg-config = { version = "0.3.14", optional = true }
 [features]
 default = ["libfuse"]
 libfuse = ["pkg-config"]
+# This feature is only available on macOS, it enable the use of `fuse-t` instead of `macfuse`.
+macos-use-fuse-t = ["libfuse"]
 serializable = ["serde"]
 abi-7-9 = []
 abi-7-10 = ["abi-7-9"]
