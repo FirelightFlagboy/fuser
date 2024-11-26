@@ -435,7 +435,7 @@ mod op {
                     );
                     let duration_since_epoch =
                         dbg!(Duration::new(self.arg.crtime, self.arg.crtimensec));
-                    Some(SystemTime::UNIX_EPOCH + duration_since_epoch)
+                    SystemTime::UNIX_EPOCH.checked_add(duration_since_epoch)
                 }
             }
             #[cfg(not(target_os = "macos"))]
