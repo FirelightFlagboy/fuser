@@ -427,9 +427,16 @@ mod op {
             #[cfg(target_os = "macos")]
             match self.arg.valid & FATTR_CRTIME {
                 0 => None,
-                _ => Some(
-                    SystemTime::UNIX_EPOCH + Duration::new(self.arg.crtime, self.arg.crtimensec),
-                ),
+                _ => {
+                    log::trace!(
+                        "crtime: {crtime} ({crtime:x}), crtimensec: {crtimensec}",
+                        crtime = self.arg.crtime,
+                        crtimensec = self.arg.crtimensec,
+                    );
+                    let duration_since_epoch =
+                        dbg!(Duration::new(self.arg.crtime, self.arg.crtimensec));
+                    Some(SystemTime::UNIX_EPOCH + duration_since_epoch)
+                }
             }
             #[cfg(not(target_os = "macos"))]
             None
@@ -1641,6 +1648,10 @@ mod op {
         opcode: &fuse_opcode,
         data: &'a [u8],
     ) -> Option<Operation<'a>> {
+        log::trace!("Parsing opcode {:?}, data: {}", opcode, {
+            use base64::prelude::*;
+            BASE64_STANDARD.encode(data)
+        });
         let mut data = ArgumentIterator::new(data);
         Some(match opcode {
             fuse_opcode::FUSE_LOOKUP => Operation::Lookup(Lookup {
