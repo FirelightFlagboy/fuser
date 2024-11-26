@@ -95,7 +95,7 @@ pub struct fuse_attr {
     // to match stat.st_ctime
     pub ctime: i64,
     #[cfg(target_os = "macos")]
-    pub crtime: u64,
+    pub crtime: i64,
     pub atimensec: u32,
     pub mtimensec: u32,
     pub ctimensec: u32,

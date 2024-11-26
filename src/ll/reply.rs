@@ -289,7 +289,7 @@ pub(crate) fn fuse_attr_from_attr(attr: &crate::FileAttr) -> abi::fuse_attr {
     #[cfg(target_os = "macos")]
     let (crtime_secs, crtime_nanos) = time_from_system_time(&attr.crtime);
 
-    abi::fuse_attr {
+    let attr = abi::fuse_attr {
         ino: attr.ino,
         size: attr.size,
         blocks: attr.blocks,
@@ -297,7 +297,7 @@ pub(crate) fn fuse_attr_from_attr(attr: &crate::FileAttr) -> abi::fuse_attr {
         mtime: mtime_secs,
         ctime: ctime_secs,
         #[cfg(target_os = "macos")]
-        crtime: crtime_secs as u64,
+        crtime: crtime_secs,
         atimensec: atime_nanos,
         mtimensec: mtime_nanos,
         ctimensec: ctime_nanos,
@@ -314,7 +314,9 @@ pub(crate) fn fuse_attr_from_attr(attr: &crate::FileAttr) -> abi::fuse_attr {
         blksize: attr.blksize,
         #[cfg(feature = "abi-7-9")]
         padding: 0,
-    }
+    };
+    log::trace!("attr={attr:?}");
+    attr
 }
 
 // TODO: Add methods for creating this without making a `FileAttr` first.
