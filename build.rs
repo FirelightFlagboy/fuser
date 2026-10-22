@@ -16,13 +16,8 @@ fn main() {
     } else if target_os == "macos" {
         if cfg!(feature = "macos-no-mount") {
             println!("cargo::rustc-cfg=fuser_mount_impl=\"macos-no-mount\"");
-        } else {
-            pkg_config::Config::new()
-                .atleast_version("2.6.0")
-                .probe("fuse") // for macFUSE 4.x
-                .map_err(|e| eprintln!("{e}"))
-                .unwrap();
-            println!("cargo::rustc-cfg=fuser_mount_impl=\"libfuse2\"");
+        } else if configure_libfuse3().is_err() {
+            configure_libfuse2().unwrap(); // Fallback to fuse2 API
             println!("cargo::rustc-cfg=feature=\"macfuse-4-compat\"");
         }
     } else if cfg!(feature = "libfuse3") {
