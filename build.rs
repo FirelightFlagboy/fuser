@@ -17,12 +17,9 @@ fn main() {
         if cfg!(feature = "macos-no-mount") {
             println!("cargo::rustc-cfg=fuser_mount_impl=\"macos-no-mount\"");
         } else {
-            pkg_config::Config::new()
-                .atleast_version("2.6.0")
-                .probe("fuse") // for macFUSE 4.x
-                .map_err(|e| eprintln!("{e}"))
-                .unwrap();
-            println!("cargo::rustc-cfg=fuser_mount_impl=\"libfuse2\"");
+            if configure_libfuse3().is_err() {
+                configure_libfuse2().unwrap() // Fallback to fuse2 API
+            }
         }
     } else if cfg!(feature = "libfuse3") {
         configure_libfuse3().unwrap();
